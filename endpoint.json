@@ -21,22 +21,22 @@
     {
       "id": 1,
       "endpoint": "https://carte.ville.quebec.qc.ca/ArcGIS/rest/services/CI/OperationDeneigement/MapServer/1/query?f=json&where=&geometry=%7B%22xmin%22:249093,%22ymin%22:5186474,%22xmax%22:249133,%22ymax%22:5186514,%22spatialReference%22:%7B%22wkid%22:32187%7D%7D&outFields=STATION_NO,STATUT,DEBUT,FIN,DateMiseJour,STATIONNEMENT",
-      "name": "Youness"
+      "name": "youness"
     },
     {
       "id": 2,
       "endpoint": "https://carte.ville.quebec.qc.ca/ArcGIS/rest/services/CI/OperationDeneigement/MapServer/1/query?f=json&where=&returnGeometry=true&spatialRel=esriSpatialRelIntersects&geometry=%7B%22xmin%22%3A249107%2C%22ymin%22%3A5187392%2C%22xmax%22%3A249147%2C%22ymax%22%3A5187432%2C%22spatialReference%22%3A%7B%22wkid%22%3A32187%7D%7D&geometryType=esriGeometryEnvelope&inSR=32187&outFields=STATION_NO%2CSTATUT%2CDEBUT%2CFIN%2CDateMiseJour%2CSTATIONNEMENT&outSR=32187",
-      "name": "JF"
+      "name": "jf"
     },
     {
       "id": 3,
       "endpoint": "https://carte.ville.quebec.qc.ca/ArcGIS/rest/services/CI/OperationDeneigement/MapServer/1/query?f=json&where=&returnGeometry=true&spatialRel=esriSpatialRelIntersects&geometry=%7B%22xmin%22%3A249938%2C%22ymin%22%3A5186228%2C%22xmax%22%3A249978%2C%22ymax%22%3A5186268%2C%22spatialReference%22%3A%7B%22wkid%22%3A32187%7D%7D&geometryType=esriGeometryEnvelope&inSR=32187&outFields=STATION_NO%2CSTATUT%2CDEBUT%2CFIN%2CDateMiseJour%2CSTATIONNEMENT&outSR=32187",
-      "name": "Kev"
+      "name": "kev"
     },
     {
       "id": 1,
       "endpoint": "https://carte.ville.quebec.qc.ca/ArcGIS/rest/services/CI/OperationDeneigement/MapServer/1/query?f=json&where=&returnGeometry=true&spatialRel=esriSpatialRelIntersects&geometry=%7B%22xmin%22%3A249110%2C%22ymin%22%3A5186270%2C%22xmax%22%3A249150%2C%22ymax%22%3A5186310%2C%22spatialReference%22%3A%7B%22wkid%22%3A32187%7D%7D&geometryType=esriGeometryEnvelope&inSR=32187&outFields=STATION_NO%2CSTATUT%2CDEBUT%2CFIN%2CDateMiseJour%2CSTATIONNEMENT&outSR=32187",
-      "name": "Romain"
+      "name": "romain"
     }
   ]
 }

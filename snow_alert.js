@@ -1,8 +1,11 @@
 'use strict';
 
+const axios = require('axios');
+
 module.exports = class SnowAlert {
-  constructor(message) {
+  constructor(request, message) {
     this.message = message;
+    this.request = request;
     this.previousValue = null;
   }
 
@@ -10,11 +13,15 @@ module.exports = class SnowAlert {
     this.message = message;
   }
 
-  startPoller(currentValue) {
+  setRequest(request) {
+    this.request = request;
+  }
+
+  startPoller() {
     console.log('Polling');
     this.deferredObj = setTimeout(() => { this.startPoller(); }, 1500);
 
-    this.evaluate(currentValue);
+    this.getLightStatus();
   }
 
   stopPoller() {
@@ -31,4 +38,15 @@ module.exports = class SnowAlert {
     this.previousValue = currentValue;
     return alert;
   }
+
+  getLightStatus() {
+    axios.get(this.request)
+    .then((response) => {
+      const status = response.data.features[0].attributes.STATUT;
+      this.evaluate(status);
+    })
+    .catch(error => {
+      console.log(error);
+    });
+}
 }

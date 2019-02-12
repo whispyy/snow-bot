@@ -33,7 +33,14 @@ client.on('message', msg => {
       case 'alert':
         if(args[0] && args[0] == 'on') {
           msg.channel.send('Turning on automatic alert');
-          return alert.startPoller();
+          if (args[1]) {
+            const req = getRequest(args[1], endpoints.endpoints);
+            if (req && req.length) {
+              alert.setRequest(req);
+              return alert.startPoller();
+            }
+            msg.channel.send(`Error: name *${args[1]}* doesn't match with stored data`);
+          }
         }
         if (!args[0] || args[0] && args[0] == 'off') {
           msg.channel.send('Turning off automatic alert');
@@ -47,7 +54,7 @@ client.on('message', msg => {
           getAllSnowLight(API, msg);
         }
         if (args[0] && args[0] !== 'all') {
-          getSnowLightName(args[0], API, msg);
+          getSpecificSnowLight(args[0], API, msg);
         }
         break;
     }
@@ -56,9 +63,14 @@ client.on('message', msg => {
 
 client.login(token);
 
+function getRequest(name, datas) {
+  const data = datas.find(data => data.name.toUpperCase() === name.toUpperCase());
+  return data.endpoint;
+}
+
 // search light status for a specific name
-function getSnowLightName(name, datas, msg) {
-  const data = datas.find(data => data.name === name);
+function getSpecificSnowLight(name, datas, msg) {
+  const data = datas.find(data => data.name.toUpperCase() === name.toUpperCase());
   if (data && data.endpoint) {
     return getSnowLightRequest(data.endpoint, msg, name);
   }
@@ -71,31 +83,31 @@ function getAllSnowLight(datas, msg) {
 }
 
 // return a specific light status for a given request and associate a name to it.
-function getSnowLightRequest(req, msg, customName) {
+function getSnowLightRequest(req, msg, name) {
   axios.get(req)
-    .then(response => {
-      const data = parseResponse(response, customName);
-      msg.channel.send(
-        `${data.customName} : ${data.status} - ${data.stationnement},
-        Last updated: ${data.lastUpdated},
-        Light ID: ${data.id}`
-      );
-
-    }).catch(error => {
+    .then(response => parseResponse(response, name.toUpperCase(), msg))
+    .catch(error => {
       console.log(error);
     });
 }
 
 // parse response from API endpoint
-function parseResponse(response, customName) {
-  // console.log(response.data.features[0].attributes);
-  return {
+function parseResponse(response, name, msg) {
+  const data = {
     id: response.data.features[0].attributes.STATION_NO,
-    customName,
+    name,
     status: response.data.features[0].attributes.STATUT,
     stationnement: response.data.features[0].attributes.STATIONNEMENT,
     lastUpdated: parseDate(response.data.features[0].attributes.DateMiseJour),
   };
+  if (msg && msg.channel) {
+    msg.channel.send(
+      `${data.name} : ${data.status} - ${data.stationnement},
+      Last updated: ${data.lastUpdated},
+      Light ID: ${data.id}`
+    );
+  }
+  return data;
 }
 
 // parse date from timestamp
