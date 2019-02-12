@@ -1,0 +1,10 @@
+{
+  "name": "snow-bot",
+  "version": "1.0.0",
+  "description": "snow removal operation in QC city",
+  "main": "bot.js",
+  "author": "JF Whispyy",
+  "dependencies": {
+    "discord.io": "^2.5.3"
+  }
+}
