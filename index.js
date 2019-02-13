@@ -36,11 +36,12 @@ client.on('message', msg => {
           if (args[1]) {
             const req = getRequest(args[1], endpoints.endpoints);
             if (req && req.length) {
-              alert.setRequest(req);
+              alert.setRequest(req, args[1].toUpperCase());
               return alert.startPoller();
             }
             msg.channel.send(`Error: name *${args[1]}* doesn't match with stored data`);
           }
+           msg.channel.send('Precise name : !alert on <name>');
         }
         if (!args[0] || args[0] && args[0] == 'off') {
           msg.channel.send('Turning off automatic alert');
@@ -62,6 +63,11 @@ client.on('message', msg => {
 });
 
 client.login(token);
+
+alert.on('status-change', (data, msg) => {
+  msg.channel.send(`**ALERTE** !
+    Nom : ${data.name} - Feu : ${data.status}`);
+})
 
 function getRequest(name, datas) {
   const data = datas.find(data => data.name.toUpperCase() === name.toUpperCase());

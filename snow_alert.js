@@ -1,11 +1,14 @@
 'use strict';
 
+const EventEmitter = require('events');
 const axios = require('axios');
 
-module.exports = class SnowAlert {
-  constructor(request, message) {
-    this.message = message;
+module.exports = class SnowAlert extends EventEmitter {
+  constructor(request, message, name) {
+    super();
     this.request = request;
+    this.username = name;
+    this.message = message;
     this.previousValue = null;
   }
 
@@ -13,13 +16,14 @@ module.exports = class SnowAlert {
     this.message = message;
   }
 
-  setRequest(request) {
+  setRequest(request, name = 'user') {
     this.request = request;
+    this.username = name;
   }
 
   startPoller() {
     console.log('Polling');
-    this.deferredObj = setTimeout(() => { this.startPoller(); }, 1500);
+    this.deferredObj = setTimeout(() => { this.startPoller(); }, 30000);
 
     this.getLightStatus();
   }
@@ -32,8 +36,11 @@ module.exports = class SnowAlert {
   evaluate(currentValue) {
     let alert = false;
     if (this.previousValue && currentValue) {
-      console.log(this.previousValue, currentValue);
       alert = this.previousValue.status !== currentValue.status;
+      if (alert) {
+        console.log('Emit: status-change', currentValue);
+        this.emit('status-change', currentValue, this.message);
+      }
     }
     this.previousValue = currentValue;
     return alert;
@@ -43,10 +50,10 @@ module.exports = class SnowAlert {
     axios.get(this.request)
     .then((response) => {
       const status = response.data.features[0].attributes.STATUT;
-      this.evaluate(status);
+      this.evaluate({ name: this.username, status });
     })
     .catch(error => {
       console.log(error);
     });
-}
+  }
 }
