@@ -13,14 +13,21 @@ It must contain following line : `DISCORD_BOT_SECRET=YOUR-TOKEN`
 
 3. Command
 
+`!alert` set/remove list alerts
+  - `!alert on <name>` : set automatic alert to on for this user
+  - `!alert off <name>` : set automatic alert to off for this user
+  - `!alert off` : remove all automatic alert
+  - `!alert list` : list all automatic alert
+
 `!snow` or `!snow all` trigger all endpoints and return following snow traffic light states
+  -`!snow <name>` : trigger specific snow traffic light state
 
-`!snow <name>` trigger specific snow traffic light state
+`!ping` check if bot is still online/available
 
-`!ping` check bot is still online/available
+`!help` show all available commands
 
 
-## endpoint example
+## Endpoint example
 
 Add endpoint to endpoint.json. Endpoints can have following looks.
 
