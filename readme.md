@@ -20,7 +20,7 @@ It must contain following line : `DISCORD_BOT_SECRET=YOUR-TOKEN`
   - `!alert list` : list all automatic alert
 
 `!snow` or `!snow all` trigger all endpoints and return following snow traffic light states
-  -`!snow <name>` : trigger specific snow traffic light state
+  - `!snow <name>` : trigger specific snow traffic light state
 
 `!ping` check if bot is still online/available
 

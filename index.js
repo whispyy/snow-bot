@@ -1,3 +1,5 @@
+require('dotenv').load();
+
 const Discord = require('discord.js');
 const axios = require('axios');
 
@@ -82,7 +84,8 @@ alerts.on('alerts-status', (data, msg) => {
 alerts.on('alerts-list', (data, msg) => {
   msg.channel.send('__Liste des alertes :__');
   data.forEach(alert => msg.channel.send(`- ${alert.username} sera alerté.`));
-})
+});
+
 
 function getRequest(name, datas) {
   const data = datas.find(data => data.name.toUpperCase() === name.toUpperCase());
