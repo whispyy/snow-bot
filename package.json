@@ -6,7 +6,7 @@
   "author": "JF Whispyy",
   "dependencies": {
     "axios": "^0.18.0",
-    "discord.io": "^2.5.3",
+    "discord.js": "^11.4.2",
     "events": "^3.0.0"
   }
 }

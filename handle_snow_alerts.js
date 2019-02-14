@@ -4,38 +4,48 @@ const SnowAlert = require('./snow_alert.js');
 const EventEmitter = require('events');
 
 module.exports = class HandleSnowAlerts extends EventEmitter {
-  constructor(alerts) {
+  constructor() {
     super();
     this.alerts = [];
   }
 
-  addAlert(newAlert) {
-    const alert = this.alerts.find(alert => alert.name == newAlert.id);
-    if (alert) {
-      this.removeAlert(alert);
+  add(newAlert) {
+    const alertObj = {
+      name: newAlert.name,
+      message: newAlert.message,
+      request: newAlert.request
+      // id: `${newAlert.message.channel.id}-${newAlert.name}`
+    };
+    const foundAlert = this.alerts.find(alert => alert.name == alertObj.name);
+    if (foundAlert) {
+      this.remove(foundAlert);
     }
-    const buildedAlert = this.buildAlert(newAlert);
-    this.alerts.push(buildedAlert);
+    this.build(alertObj);
   }
 
-  buildAlert(newAlert) {
-    const alert = new SnowAlert(newAlert.request, newAlert.message, newAlert.name);
+  build(alertObj) {
+    const alert = new SnowAlert(alertObj.request, alertObj.message, alertObj.name, alertObj.id);
+    this.alerts.push(alert);
     alert.startPoller();
     alert.on('status-change', (data, msg) => {
       this.emit('alerts-status', data, msg);
     })
   }
 
-  removeAlert(newAlert) {
-    const alert = this.alerts.find(alert => alert.id == newAlert.id);
+  remove(name) {
+    const alert = this.alerts.find(alert => alert.name == name);
     if (alert) {
       alert.stopPoller();
-      this.alerts = this.alerts.filter(alert => alert.id == newAlert.id);
+      this.alerts = this.alerts.filter(alert => alert.name == name);
     }
   }
 
   removeAll() {
     this.alerts.forEach(alert => alert.stopPoller());
     this.alerts = [];
+  }
+
+  listAll(msg) {
+    this.emit('alerts-list', this.alerts, msg);
   }
 }

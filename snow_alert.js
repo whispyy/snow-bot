@@ -6,12 +6,10 @@ const axios = require('axios');
 module.exports = class SnowAlert extends EventEmitter {
   constructor(request, message, name) {
     super();
-    if (message && message.channel) {
-      this.id = `${message.channel.id}-${name}`;  
-    }
     this.request = request;
     this.username = name;
     this.message = message;
+    // this.id = id;
     this.previousValue = null;
   }
 

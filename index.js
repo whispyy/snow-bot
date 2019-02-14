@@ -3,11 +3,11 @@ const axios = require('axios');
 
 const endpoints = require('./endpoint.json');
 const keep_alive = require('./keep_alive.js');
-const SnowAlert = require('./snow_alert.js');
+const HandleSnowAlerts = require('./handle_snow_alerts.js');
 
 const client = new Discord.Client();
 const token = process.env.DISCORD_BOT_SECRET;
-const alert = new SnowAlert();
+const alerts = new HandleSnowAlerts();
 
 client.on('ready', () => {
   console.log(`Connected as: ${client.user.username}`);
@@ -18,7 +18,6 @@ client.on('message', msg => {
     let args = msg.content.substring(1).split(' ');
     let cmd = args[0];
     args = args.splice(1);
-    alert.setMessage(msg);
     console.log('activate:', msg.content);
 
     switch (cmd) {
@@ -31,21 +30,32 @@ client.on('message', msg => {
         getHelp(helpAPI, msg);
         break;
       case 'alert':
+        if(args[0] && args[0] == 'list') {
+          return alerts.listAll(msg);
+        }
         if(args[0] && args[0] == 'on') {
-          msg.channel.send('Turning on automatic alert');
+          msg.channel.send(`Turning on automatic alert for *${args[1]}*`);
           if (args[1]) {
             const req = getRequest(args[1], endpoints.endpoints);
             if (req && req.length) {
-              alert.setRequest(req, args[1].toUpperCase());
-              return alert.startPoller();
+              const newAlert = {
+                name: args[1].toUpperCase(),
+                request: req,
+                message: msg
+              };
+              return alerts.add(newAlert);
             }
             msg.channel.send(`Error: name *${args[1]}* doesn't match with stored data`);
           }
            msg.channel.send('Precise name : !alert on <name>');
         }
         if (!args[0] || args[0] && args[0] == 'off') {
+          if (args[1]) {
+            msg.channel.send(`Turning off automatic alert for *${args[1]}*`);
+            return alerts.remove(args[1].toUpperCase());
+          }
           msg.channel.send('Turning off automatic alert');
-          return alert.stopPoller();
+          return alerts.removeAll();
         }
         break;
       case 'snow':
@@ -64,9 +74,14 @@ client.on('message', msg => {
 
 client.login(token);
 
-alert.on('status-change', (data, msg) => {
+alerts.on('alerts-status', (data, msg) => {
   msg.channel.send(`**ALERTE** !
     Nom : ${data.name} - Feu : ${data.status}`);
+});
+
+alerts.on('alerts-list', (data, msg) => {
+  msg.channel.send('__Liste des alertes :__');
+  data.forEach(alert => msg.channel.send(`- ${alert.username} sera alerté.`));
 })
 
 function getRequest(name, datas) {
