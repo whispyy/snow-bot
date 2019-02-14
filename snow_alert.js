@@ -6,6 +6,9 @@ const axios = require('axios');
 module.exports = class SnowAlert extends EventEmitter {
   constructor(request, message, name) {
     super();
+    if (message && message.channel) {
+      this.id = `${message.channel.id}-${name}`;  
+    }
     this.request = request;
     this.username = name;
     this.message = message;
@@ -22,8 +25,8 @@ module.exports = class SnowAlert extends EventEmitter {
   }
 
   startPoller() {
-    console.log('Polling');
-    this.deferredObj = setTimeout(() => { this.startPoller(); }, 30000);
+    console.log('Polling every 15 min');
+    this.deferredObj = setTimeout(() => { this.startPoller(); }, 900000);
 
     this.getLightStatus();
   }
