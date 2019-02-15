@@ -3,7 +3,7 @@
 const SnowAlert = require('./snow_alert.js');
 const EventEmitter = require('events');
 
-module.exports = class HandleSnowAlerts extends EventEmitter {
+module.exports = class SnowAlertsHandler extends EventEmitter {
   constructor() {
     super();
     this.alerts = [];
