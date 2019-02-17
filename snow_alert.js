@@ -7,7 +7,7 @@ module.exports = class SnowAlert extends EventEmitter {
   constructor(request, message, name) {
     super();
     this.request = request;
-    this.username = name;
+    this.name = name;
     this.message = message;
     // this.id = id;
     this.previousValue = null;
@@ -19,7 +19,7 @@ module.exports = class SnowAlert extends EventEmitter {
 
   setRequest(request, name = 'user') {
     this.request = request;
-    this.username = name;
+    this.name = name;
   }
 
   startPoller() {
@@ -51,7 +51,7 @@ module.exports = class SnowAlert extends EventEmitter {
     axios.get(this.request)
     .then((response) => {
       const status = response.data.features[0].attributes.STATUT;
-      this.evaluate({ name: this.username, status });
+      this.evaluate({ name: this.name, status });
     })
     .catch(error => {
       console.log(error);

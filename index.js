@@ -13,6 +13,9 @@ const alerts = new SnowAlertsHandler();
 
 client.on('ready', () => {
   console.log(`Connected as: ${client.user.username}`);
+
+  // check for existing alerts
+  alerts.backup();
 });
 
 client.on('message', msg => {
@@ -83,7 +86,7 @@ alerts.on('alerts-status', (data, msg) => {
 
 alerts.on('alerts-list', (data, msg) => {
   msg.channel.send('__Liste des alertes :__');
-  data.forEach(alert => msg.channel.send(`- ${alert.username} sera alerté.`));
+  data.forEach(alert => msg.channel.send(`- ${alert.name} sera alerté.`));
 });
 
 
