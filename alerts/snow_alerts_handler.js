@@ -10,22 +10,6 @@ module.exports = class SnowAlertsHandler extends EventEmitter {
     this.alerts = [];
   }
 
-  backup() {
-    // check existing alerts to add
-    fs.exists('save_alerts.json', (exists) => {
-      if(exists) {
-          fs.readFile('save_alerts.json', function readFileCallback(err, data) {
-            if (err) {
-                console.log(err);
-            } else {
-              const obj = JSON.parse(data);  
-              console.log(obj);
-            }
-          });
-      }
-    });
-  }
-
   add(newAlert) {
     const alertObj = {
       name: newAlert.name,
@@ -40,8 +24,7 @@ module.exports = class SnowAlertsHandler extends EventEmitter {
     this.build(alertObj);
 
     // save alert in file
-    // const json = JSON.stringify(alertObj);
-    // fs.writeFile('save_alerts.json', json, 'utf8', callback);
+    this.createBackup();
   }
 
   build(alertObj) {
@@ -59,6 +42,7 @@ module.exports = class SnowAlertsHandler extends EventEmitter {
       alert.stopPoller();
       this.alerts = this.alerts.filter(alert => alert.name != name);
       // remove from registered
+      this.createBackup();
     }
   }
 
@@ -70,5 +54,28 @@ module.exports = class SnowAlertsHandler extends EventEmitter {
 
   listAll(msg) {
     this.emit('alerts-list', this.alerts, msg);
+  }
+
+  createBackup() {
+    // console.log({ alerts: this.alerts });
+    const jsonAlerts = JSON.stringify({ alert: 'lol' }, null, 2);
+    fs.writeFile('save_alerts.json', jsonAlerts, err => err ? console.log(err) : console.log('alerts saved'));
+  }
+
+
+  recover() {
+    // check existing alerts to add
+    fs.exists('save_alerts.json', (exists) => {
+      if(exists) {
+          fs.readFile('save_alerts.json', function readFileCallback(err, data) {
+            if (err) {
+                console.log(err);
+            } else {
+              const obj = JSON.parse(data);  
+              console.log(obj);
+            }
+          });
+      }
+    });
   }
 }

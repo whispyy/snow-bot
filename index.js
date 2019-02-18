@@ -5,7 +5,7 @@ const axios = require('axios');
 
 const endpoints = require('./endpoint.json');
 const keep_alive = require('./keep_alive.js');
-const SnowAlertsHandler = require('./snow_alerts_handler.js');
+const SnowAlertsHandler = require('./alerts/snow_alerts_handler.js');
 
 const client = new Discord.Client();
 const token = process.env.DISCORD_BOT_SECRET;
@@ -15,7 +15,7 @@ client.on('ready', () => {
   console.log(`Connected as: ${client.user.username}`);
 
   // check for existing alerts
-  alerts.backup();
+  alerts.recover();
 });
 
 client.on('message', msg => {
