@@ -1,21 +1,39 @@
 'use strict';
 
 const SnowAlert = require('./snow_alert.js');
+
 const EventEmitter = require('events');
-const fs = require('fs');
+const CircularJSON = require('circular-json');
+const storage = require('node-persist');
 
 module.exports = class SnowAlertsHandler extends EventEmitter {
   constructor() {
     super();
     this.alerts = [];
+    this.storage = false;
+  }
+
+  initStorage() {
+    this.storage = true;
+    storage.init({
+      dir: './',
+      stringify: CircularJSON.stringify,
+      parse: JSON.parse,
+      encoding: 'utf8',
+      logging: false,
+      ttl: false,
+      forgiveParseErrors: false
+    })
+      .then(() => this.recover())
+      .catch(err => console.log('Error init storage', err));
   }
 
   add(newAlert) {
     const alertObj = {
       name: newAlert.name,
-      message: newAlert.message,
+      channelID: newAlert.channelID,
       request: newAlert.request
-      // id: `${newAlert.message.channel.id}-${newAlert.name}`
+      // id: `${newAlert.channelID}-${newAlert.name}`
     };
     const foundAlert = this.alerts.find(alert => alert.name == alertObj.name);
     if (foundAlert) {
@@ -23,16 +41,18 @@ module.exports = class SnowAlertsHandler extends EventEmitter {
     }
     this.build(alertObj);
 
-    // save alert in file
-    this.createBackup();
+    // save alerts in file
+    if (this.storage) {
+      storage.setItem('alerts', this.alerts);
+    }
   }
 
   build(alertObj) {
-    const alert = new SnowAlert(alertObj.request, alertObj.message, alertObj.name, alertObj.id);
-    this.alerts.push(alert);
+    const alert = new SnowAlert(alertObj.request, alertObj.channelID, alertObj.name);
+    this.alerts.push(alertObj);
     alert.startPoller();
-    alert.on('status-change', (data, msg) => {
-      this.emit('alerts-status', data, msg);
+    alert.on('status-change', (data, channelID) => {
+      this.emit('alerts-status', data, channelID);
     });
   }
 
@@ -41,8 +61,11 @@ module.exports = class SnowAlertsHandler extends EventEmitter {
     if (alert) {
       alert.stopPoller();
       this.alerts = this.alerts.filter(alert => alert.name != name);
-      // remove from registered
-      this.createBackup();
+      // update storage
+      if (this.storage) {
+        storage.removeItem('alerts')
+          .then(() => storage.setItem('alerts', this.alerts));
+      }
     }
   }
 
@@ -50,31 +73,21 @@ module.exports = class SnowAlertsHandler extends EventEmitter {
     this.alerts.forEach(alert => alert.stopPoller());
     this.alerts = [];
     // clear register
+    if (this.storage) {
+      storage.removeItem('alerts')
+      .then(() => storage.clear());
+    }
   }
 
-  listAll(msg) {
-    this.emit('alerts-list', this.alerts, msg);
+  listAll(channelID) {
+    this.emit('alerts-list', this.alerts, channelID);
   }
-
-  createBackup() {
-    // console.log({ alerts: this.alerts });
-    // const jsonAlerts = JSON.stringify({ alert: 'lol' });
-    // fs.writeFile('save_alerts.json', jsonAlerts, err => err ? console.log(err) : console.log('alerts saved'));
-  }
-
 
   recover() {
     // check existing alerts to add
-    fs.exists('save_alerts.json', (exists) => {
-      if(exists) {
-          fs.readFile('save_alerts.json', function readFileCallback(err, data) {
-            if (err) {
-                console.log(err);
-            } else {
-              const obj = JSON.parse(data);  
-              console.log(obj);
-            }
-          });
+    storage.getItem('alerts').then((alerts) => {
+      if (alerts) {
+        alerts.forEach(alert => this.build(alert));
       }
     });
   }

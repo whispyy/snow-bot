@@ -15,7 +15,7 @@ client.on('ready', () => {
   console.log(`Connected as: ${client.user.username}`);
 
   // check for existing alerts
-  alerts.recover();
+  alerts.initStorage();
 });
 
 client.on('message', msg => {
@@ -36,7 +36,7 @@ client.on('message', msg => {
         break;
       case 'alert':
         if(args[0] && args[0] == 'list') {
-          return alerts.listAll(msg);
+          return alerts.listAll(msg.channel.id);
         }
         if(args[0] && args[0] == 'on') {
           if (args[1]) {
@@ -47,7 +47,7 @@ client.on('message', msg => {
               const newAlert = {
                 name: args[1].toUpperCase(),
                 request: req,
-                message: msg
+                channelID: msg.channel.id
               };
               return alerts.add(newAlert);
             }
@@ -58,10 +58,10 @@ client.on('message', msg => {
               alerts.add({
                 name: data.name,
                 request: data.endpoint,
-                message: msg
+                channelID: msg.channel.id
               });
             });
-            return alerts.listAll(msg);
+            return alerts.listAll(msg.channel.id);
           }
         }
         if (!args[0] || args[0] && args[0] == 'off') {
@@ -89,14 +89,16 @@ client.on('message', msg => {
 
 client.login(token);
 
-alerts.on('alerts-status', (data, msg) => {
-  msg.channel.send(`**ALERTE** !
-    Nom : ${data.name} - Feu : ${data.status}`);
+alerts.on('alerts-status', (data, channelID) => {
+  client.channels.get(data.channelID).send(
+    `**ALERTE** !
+    Nom : ${data.name} - Feu : ${data.status}`
+  );
 });
 
-alerts.on('alerts-list', (data, msg) => {
-  msg.channel.send('__Liste des alertes :__');
-  data.forEach(alert => msg.channel.send(`- ${alert.name} sera alerté.`));
+alerts.on('alerts-list', (data, channelID) => {
+  client.channels.get(channelID).send('__Liste des alertes :__');
+  data.forEach(alert => client.channels.get(channelID).send(`- ${alert.name} sera alerté.`));
 });
 
 
