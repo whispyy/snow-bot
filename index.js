@@ -39,8 +39,9 @@ client.on('message', msg => {
           return alerts.listAll(msg);
         }
         if(args[0] && args[0] == 'on') {
-          msg.channel.send(`Turning on automatic alert for *${args[1]}*`);
           if (args[1]) {
+            // alert for specific endpoint
+            msg.channel.send(`Turning on automatic alert for *${args[1]}*`);
             const req = getRequest(args[1], endpoints.endpoints);
             if (req && req.length) {
               const newAlert = {
@@ -51,8 +52,17 @@ client.on('message', msg => {
               return alerts.add(newAlert);
             }
             msg.channel.send(`Error: name *${args[1]}* doesn't match with stored data`);
+          } else {
+            // alert for all endpoints
+            endpoints.endpoints.forEach(data => {
+              alerts.add({
+                name: data.name,
+                request: data.endpoint,
+                message: msg
+              });
+            });
+            return alerts.listAll(msg);
           }
-           msg.channel.send('Precise name : !alert on <name>');
         }
         if (!args[0] || args[0] && args[0] == 'off') {
           if (args[1]) {

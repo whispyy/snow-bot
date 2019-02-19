@@ -58,8 +58,8 @@ module.exports = class SnowAlertsHandler extends EventEmitter {
 
   createBackup() {
     // console.log({ alerts: this.alerts });
-    const jsonAlerts = JSON.stringify({ alert: 'lol' }, null, 2);
-    fs.writeFile('save_alerts.json', jsonAlerts, err => err ? console.log(err) : console.log('alerts saved'));
+    // const jsonAlerts = JSON.stringify({ alert: 'lol' });
+    // fs.writeFile('save_alerts.json', jsonAlerts, err => err ? console.log(err) : console.log('alerts saved'));
   }
 
 
