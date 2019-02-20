@@ -11,6 +11,8 @@ const client = new Discord.Client();
 const token = process.env.DISCORD_BOT_SECRET;
 const alerts = new SnowAlertsHandler();
 
+client.login(token);
+
 client.on('ready', () => {
   console.log(`Connected as: ${client.user.username}`);
 
@@ -87,18 +89,22 @@ client.on('message', msg => {
   }
 });
 
-client.login(token);
-
 alerts.on('alerts-status', (data, channelID) => {
-  client.channels.get(data.channelID).send(
-    `**ALERTE** !
-    Nom : ${data.name} - Feu : ${data.status}`
-  );
+  const sender = client.channels.get(channelID);
+  if (sender) {
+    sender.send(
+      `**ALERTE** !
+      Nom : ${data.name} - Feu : ${data.status}`
+    );
+  }
 });
 
 alerts.on('alerts-list', (data, channelID) => {
-  client.channels.get(channelID).send('__Liste des alertes :__');
-  data.forEach(alert => client.channels.get(channelID).send(`- ${alert.name} sera alerté.`));
+  const sender = client.channels.get(channelID);
+  if (sender) {
+    sender.send('__Liste des alertes :__');
+    data.forEach(alert => sender.send(`- ${alert.name} sera alerté.`));
+  }
 });
 
 

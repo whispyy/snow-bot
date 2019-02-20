@@ -7,8 +7,8 @@ module.exports = class SnowAlert extends EventEmitter {
   constructor(request, channelID, name) {
     super();
     this.request = request;
-    this.name = name;
     this.channelID = channelID;
+    this.name = name;
     // this.id = id;
     this.previousValue = null;
   }
@@ -35,16 +35,16 @@ module.exports = class SnowAlert extends EventEmitter {
   }
 
   evaluate(currentValue) {
-    // let alert = false;
-    // if (this.previousValue && currentValue) {
-    //   alert = this.previousValue.status !== currentValue.status;
-    //   if (alert) {
+    let alert = false;
+    if (this.previousValue && currentValue) {
+      alert = this.previousValue.status !== currentValue.status;
+      if (alert) {
         console.log('Emit: status-change', currentValue, this.channelID);
         this.emit('status-change', currentValue, this.channelID);
-    //   }
-    // }
-    // this.previousValue = currentValue;
-    // return alert;
+      }
+    }
+    this.previousValue = currentValue;
+    return alert;
   }
 
   getLightStatus() {

@@ -49,7 +49,7 @@ module.exports = class SnowAlertsHandler extends EventEmitter {
 
   build(alertObj) {
     const alert = new SnowAlert(alertObj.request, alertObj.channelID, alertObj.name);
-    this.alerts.push(alertObj);
+    this.alerts.push(alert);
     alert.startPoller();
     alert.on('status-change', (data, channelID) => {
       this.emit('alerts-status', data, channelID);
@@ -64,7 +64,8 @@ module.exports = class SnowAlertsHandler extends EventEmitter {
       // update storage
       if (this.storage) {
         storage.removeItem('alerts')
-          .then(() => storage.setItem('alerts', this.alerts));
+          .then(() => storage.setItem('alerts', this.alerts))
+          .catch(err => console.log('Error remove item', err));;
       }
     }
   }
@@ -75,7 +76,8 @@ module.exports = class SnowAlertsHandler extends EventEmitter {
     // clear register
     if (this.storage) {
       storage.removeItem('alerts')
-      .then(() => storage.clear());
+        .then((ok) => console.log('Success clear storage', ok))
+        .catch(err => console.log('Error clear storage', err));
     }
   }
 
@@ -85,10 +87,12 @@ module.exports = class SnowAlertsHandler extends EventEmitter {
 
   recover() {
     // check existing alerts to add
-    storage.getItem('alerts').then((alerts) => {
-      if (alerts) {
-        alerts.forEach(alert => this.build(alert));
-      }
-    });
+    storage.getItem('alerts')
+      .then((alerts) => {
+        if (alerts) {
+          alerts.forEach(alert => this.build(alert));
+        }
+      })
+      .catch(err => console.log('Error read storage', err));
   }
 }
