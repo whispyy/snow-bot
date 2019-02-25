@@ -6,6 +6,7 @@ const axios = require('axios');
 const endpoints = require('./endpoint.json');
 const keep_alive = require('./keep_alive.js');
 const SnowAlertsHandler = require('./alerts/snow_alerts_handler.js');
+const utils = require('./utils/utils.js');
 
 const client = new Discord.Client();
 const token = process.env.DISCORD_BOT_SECRET;
@@ -79,10 +80,10 @@ client.on('message', msg => {
         const API = endpoints.endpoints;
         if (!args[0] || args[0] && args[0] == 'all') {
           msg.channel.send('__État des feux :__');
-          getAllSnowLight(API, msg);
+          utils.debounce(getAllSnowLight(API, msg), 2000);
         }
         if (args[0] && args[0] !== 'all') {
-          getSpecificSnowLight(args[0], API, msg);
+          utils.debounce(getSpecificSnowLight(args[0], API, msg), 2000);
         }
         break;
     }
@@ -143,7 +144,7 @@ function parseResponse(response, name, msg) {
     name,
     status: response.data.features[0].attributes.STATUT,
     stationnement: response.data.features[0].attributes.STATIONNEMENT,
-    lastUpdated: parseDate(response.data.features[0].attributes.DateMiseJour),
+    lastUpdated: utils.parseDate(response.data.features[0].attributes.DateMiseJour),
   };
   if (msg && msg.channel) {
     msg.channel.send(
@@ -153,11 +154,6 @@ function parseResponse(response, name, msg) {
     );
   }
   return data;
-}
-
-// parse date from timestamp
-function parseDate(date) {
-  return new Date(date).toLocaleString();
 }
 
 // show help commands
