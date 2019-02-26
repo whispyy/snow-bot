@@ -21,7 +21,7 @@ client.on('ready', () => {
   alerts.initStorage();
 });
 
-client.on('message', msg => {
+client.on('message', utils.debounce((msg) => {
   if (msg.content[0] == '!' && msg.author.id != client.user.id) {
     let args = msg.content.substring(1).split(' ');
     let cmd = args[0];
@@ -38,10 +38,10 @@ client.on('message', msg => {
         getHelp(helpAPI, msg);
         break;
       case 'alert':
-        if(args[0] && args[0] == 'list') {
+        if (args[0] && args[0] == 'list') {
           return alerts.listAll(msg.channel.id);
         }
-        if(args[0] && args[0] == 'on') {
+        if (args[0] && args[0] == 'on') {
           if (args[1]) {
             // alert for specific endpoint
             msg.channel.send(`Turning on automatic alert for *${args[1]}*`);
@@ -80,15 +80,15 @@ client.on('message', msg => {
         const API = endpoints.endpoints;
         if (!args[0] || args[0] && args[0] == 'all') {
           msg.channel.send('__État des feux :__');
-          utils.debounce(getAllSnowLight(API, msg), 2000);
+          getAllSnowLight(API, msg);
         }
         if (args[0] && args[0] !== 'all') {
-          utils.debounce(getSpecificSnowLight(args[0], API, msg), 2000);
+          getSpecificSnowLight(args[0], API, msg);
         }
         break;
     }
   }
-});
+}, 350));
 
 alerts.on('alerts-status', (data, channelID) => {
   const sender = client.channels.get(channelID);
