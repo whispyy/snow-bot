@@ -38,6 +38,6 @@ Add endpoint to endpoint.json. Endpoints can have following looks.
 
 > https://carte.ville.quebec.qc.ca/ArcGIS/rest/services/CI/OperationDeneigement/MapServer/1/query?f=json&where=&geometry={"xmin":249093,"ymin":5186474,"xmax":249133,"ymax":5186514}&outFields=STATION_NO,STATUT,DEBUT,FIN,DateMiseJour,STATIONNEMENT
 
-Get status for all traffic light at once
+Get status for all traffic light at once (limited to 1000)
 
 > https://carte.ville.quebec.qc.ca/ArcGIS/rest/services/CI/OperationDeneigement/MapServer/1/query?f=json&where=&geometry={%22xmin%22:0,%22ymin%22:0,%22xmax%22:999999,%22ymax%22:9999999}&outFields=STATION_NO,STATUT,DEBUT,FIN,DateMiseJour,STATIONNEMENT
