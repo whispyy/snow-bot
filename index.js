@@ -34,7 +34,6 @@ client.on('message', utils.debounce((msg) => {
         break;
       case 'help':
         const helpAPI = endpoints.commands;
-        msg.channel.send('__Available Commands :__');
         getHelp(helpAPI, msg);
         break;
       case 'alert':
@@ -45,7 +44,7 @@ client.on('message', utils.debounce((msg) => {
           if (args[1]) {
             // alert for specific endpoint
             msg.channel.send(`Turning on automatic alert for *${args[1]}*`);
-            const req = getRequest(args[1], endpoints.endpoints);
+            const req = utils.getRequest(args[1], endpoints.endpoints);
             if (req && req.length) {
               const newAlert = {
                 name: args[1].toUpperCase(),
@@ -109,11 +108,6 @@ alerts.on('alerts-list', (data, channelID) => {
 });
 
 
-function getRequest(name, datas) {
-  const data = datas.find(data => data.name.toUpperCase() === name.toUpperCase());
-  return data.endpoint;
-}
-
 // search light status for a specific name
 function getSpecificSnowLight(name, datas, msg) {
   const data = datas.find(data => data.name.toUpperCase() === name.toUpperCase());
@@ -159,6 +153,7 @@ function parseResponse(response, name, msg) {
 // show help commands
 function getHelp(datas, msg) {
   let help = '';
+  msg.channel.send('__Available Commands :__');
   datas.forEach(data => help += `${data.name} : ${data.desc} \n`);
   msg.channel.send(help);
 }
