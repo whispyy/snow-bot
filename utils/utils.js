@@ -14,3 +14,9 @@ exports.debounce = (fn, time) => {
 exports.parseDate = (date) => {
   return new Date(date).toLocaleString();
 };
+
+// return request corresponding to name in endpoint array
+exports.getRequest = (name, jsonDatas) => {
+  const data = jsonDatas.find(data => data.name.toUpperCase() === name.toUpperCase());
+  return data.endpoint;
+};
