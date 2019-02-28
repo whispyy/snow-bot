@@ -43,7 +43,7 @@ module.exports = class SnowAlertsHandler extends EventEmitter {
 
     // save alerts in file
     if (this.storage) {
-      storage.setItem('alerts', this.alerts);
+      this.save();
     }
   }
 
@@ -64,7 +64,7 @@ module.exports = class SnowAlertsHandler extends EventEmitter {
       // update storage
       if (this.storage) {
         storage.removeItem('alerts')
-          .then(() => storage.setItem('alerts', this.alerts))
+          .then(() => this.save())
           .catch(err => console.log('Error remove item', err));;
       }
     }
@@ -94,5 +94,11 @@ module.exports = class SnowAlertsHandler extends EventEmitter {
         }
       })
       .catch(err => console.log('Error read storage', err));
+  }
+
+  save() {
+    storage.setItem('alerts', this.alerts)
+      .then((ok) => console.log('Success save in storage', ok))
+      .catch(err => console.log('Error save in storage', err));
   }
 }
