@@ -14,10 +14,9 @@ const alerts = new SnowAlertsHandler();
 
 client.login(token);
 
+
 client.on('ready', () => {
   console.log(`Connected as: ${client.user.username}`);
-
-  // check for existing alerts
   alerts.initStorage();
 });
 
@@ -34,55 +33,19 @@ client.on('message', utils.debounce((msg) => {
         break;
       case 'help':
         const helpAPI = endpoints.commands;
-        getHelp(helpAPI, msg);
+        help(helpAPI, msg);
         break;
       case 'alert':
-        if (args[0] && args[0] == 'list') {
-          return alerts.listAll(msg.channel.id);
-        }
-        if (args[0] && args[0] == 'on') {
-          if (args[1]) {
-            // alert for specific endpoint
-            msg.channel.send(`Turning on automatic alert for *${args[1]}*`);
-            const req = utils.getRequest(args[1], endpoints.endpoints);
-            if (req && req.length) {
-              const newAlert = {
-                name: args[1].toUpperCase(),
-                request: req,
-                channelID: msg.channel.id
-              };
-              return alerts.add(newAlert);
-            }
-            msg.channel.send(`Error: name *${args[1]}* doesn't match with stored data`);
-          } else {
-            // alert for all endpoints
-            endpoints.endpoints.forEach(data => {
-              alerts.add({
-                name: data.name,
-                request: data.endpoint,
-                channelID: msg.channel.id
-              });
-            });
-            return alerts.listAll(msg.channel.id);
-          }
-        }
-        if (!args[0] || args[0] && args[0] == 'off') {
-          if (args[1]) {
-            msg.channel.send(`Turning off automatic alert for *${args[1]}*`);
-            return alerts.remove(args[1].toUpperCase());
-          }
-          msg.channel.send('Turning off automatic alert');
-          return alerts.removeAll();
-        }
+        alert(args, msg);
         break;
       case 'snow':
         const API = endpoints.endpoints;
         if (!args[0] || args[0] && args[0] == 'all') {
           msg.channel.send('__État des feux :__');
-          getAllSnowLight(API, msg);
+          snowAll(API, msg);
         }
         if (args[0] && args[0] !== 'all') {
-          getSpecificSnowLight(args[0], API, msg);
+          snowName(args[0], API, msg);
         }
         break;
     }
@@ -108,8 +71,65 @@ alerts.on('alerts-list', (data, channelID) => {
 });
 
 
-// search light status for a specific name
-function getSpecificSnowLight(name, datas, msg) {
+/******************
+* Command handler *
+******************/
+
+
+/* Handle help command */
+function help(datas, msg) {
+  let help = '';
+  msg.channel.send('__Available Commands :__');
+  datas.forEach(data => help += `${data.name} : ${data.desc} \n`);
+  msg.channel.send(help);
+}
+
+/* Handle alert command */
+function alert(args, msg) {
+  // list current alerts
+  if (args[0] && args[0] == 'list') {
+    return alerts.listAll(msg.channel.id);
+  }
+  // turn on alert <name>
+  if (args[0] && args[0] == 'on') {
+    if (args[1]) {
+      msg.channel.send(`Turning on automatic alert for *${args[1]}*`);
+      const req = utils.getRequest(args[1], endpoints.endpoints);
+      if (req && req.length) {
+        const newAlert = {
+          name: args[1].toUpperCase(),
+          request: req,
+          channelID: msg.channel.id
+        };
+        return alerts.add(newAlert);
+      }
+      msg.channel.send(`Error: name *${args[1]}* doesn't match with stored data`);
+    } else {
+      // alert for all endpoints
+      endpoints.endpoints.forEach(data => {
+        alerts.add({
+          name: data.name,
+          request: data.endpoint,
+          channelID: msg.channel.id
+        });
+      });
+      return alerts.listAll(msg.channel.id);
+    }
+  }
+  // turn off alert <name> or turn off all registered alerts
+  if (!args[0] || args[0] && args[0] == 'off') {
+    if (args[1]) {
+      msg.channel.send(`Turning off automatic alert for *${args[1]}*`);
+      return alerts.remove(args[1].toUpperCase());
+    }
+    msg.channel.send('Turning off automatic alert');
+    return alerts.removeAll();
+  }
+}
+
+/* Handle snow name command */
+function snowName(name, datas, msg) {
+  // search light status for a specific name
   const data = datas.find(data => data.name.toUpperCase() === name.toUpperCase());
   if (data && data.endpoint) {
     return getSnowLightRequest(data.endpoint, msg, name);
@@ -117,8 +137,8 @@ function getSpecificSnowLight(name, datas, msg) {
   return msg.channel.send(`Error: name *${name}* doesn't match with stored data`);
 }
 
-// return light status for each endpoint in endpoint.json
-function getAllSnowLight(datas, msg) {
+/* Handle snow all command */
+function snowAll(datas, msg) {
   datas.forEach(data => getSnowLightRequest(data.endpoint, msg, data.name));
 }
 
@@ -148,12 +168,4 @@ function parseResponse(response, name, msg) {
     );
   }
   return data;
-}
-
-// show help commands
-function getHelp(datas, msg) {
-  let help = '';
-  msg.channel.send('__Available Commands :__');
-  datas.forEach(data => help += `${data.name} : ${data.desc} \n`);
-  msg.channel.send(help);
 }
