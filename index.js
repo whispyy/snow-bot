@@ -2,6 +2,7 @@ require('dotenv').load();
 
 const Discord = require('discord.js');
 const axios = require('axios');
+const https = require('https');
 
 const endpoints = require('./endpoint.json');
 const keep_alive = require('./keep_alive.js');
@@ -124,10 +125,22 @@ function getAllSnowLight(datas, msg) {
 
 // return a specific light status for a given request and associate a name to it.
 function getSnowLightRequest(req, msg, name) {
-  axios.get(req)
+  const agent = new https.Agent({  
+    rejectUnauthorized: false
+  });
+  axios.get(req, { httpsAgent: agent })
     .then(response => parseResponse(response, name.toUpperCase(), msg))
-    .catch(error => {
-      console.log(error);
+    .catch((error) => {
+      if (error.response) {
+        console.log(error.response.data);
+        console.log(error.response.status);
+        console.log(error.response.headers);
+      } else if (error.request) {
+        console.log(error.request);
+      } else {
+        console.log('Error', error.message);
+      }
+      console.log(error.config);
     });
 }
 
