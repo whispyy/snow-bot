@@ -56,11 +56,28 @@ module.exports = class SnowAlertsHandler extends EventEmitter {
     });
   }
 
+  linkMention(name, mentionName) {
+    const linkedAlert = this.alerts.find(alert => name == alert.name);
+    if (linkedAlert) {
+      linkedAlert.setMention(mentionName);
+      this.alerts = this.alerts.filter(alert => alert.name !== name);
+      this.alerts.push(linkedAlert);
+
+      // update storage
+      if (this.storage) {
+        storage.removeItem('alerts')
+          .then(() => this.save())
+          .catch(err => console.log('Error remove item', err));;
+      }
+    }
+  }
+
   remove(name) {
     const alert = this.alerts.find(alert => alert.name == name);
     if (alert) {
       alert.stopPoller();
       this.alerts = this.alerts.filter(alert => alert.name != name);
+
       // update storage
       if (this.storage) {
         storage.removeItem('alerts')

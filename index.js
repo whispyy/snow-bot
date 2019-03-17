@@ -126,6 +126,14 @@ function alert(args, msg) {
     msg.channel.send('Turning off automatic alert');
     return alerts.removeAll();
   }
+  // link user alert to discord name
+  if (args[0] && args[0] == 'link') {
+    if (args[1]) {
+      const mentionName = msg.author.id;
+      msg.channel.send(`Associate mention ${mentionName} to ${args[1]}`);
+      alerts.linkMention(args[1].toUpperCase(), mentionName);
+    }
+  }
 }
 
 /* Handle snow name command */

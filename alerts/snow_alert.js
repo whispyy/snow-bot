@@ -12,6 +12,7 @@ module.exports = class SnowAlert extends EventEmitter {
     this.name = name;
     // this.id = id;
     this.previousValue = null;
+    this.mentionName = null;
   }
 
   setchannelID(channelID) {
@@ -21,6 +22,10 @@ module.exports = class SnowAlert extends EventEmitter {
   setRequest(request, name = 'user') {
     this.request = request;
     this.name = name;
+  }
+
+  setMention(mentionName) {
+    this.mentionName = mentionName;
   }
 
   startPoller() {
