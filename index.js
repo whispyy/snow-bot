@@ -56,10 +56,12 @@ client.on('message', utils.debounce((msg) => {
 alerts.on('alerts-status', (data, channelID) => {
   const sender = client.channels.get(channelID);
   if (sender) {
-    sender.send(
-      `**ALERTE** !
-      Nom : ${data.name} - Feu : ${data.status}`
-    );
+    const template = data.mentionName ?
+    `**ALERTE** !
+      Nom: ${data.name} <@${data.mentionName}> - Feu: ${data.status}` :
+    `**ALERTE** !
+      Nom: ${data.name} - Feu: ${data.status}`;
+    return sender.send(template);
   }
 });
 
@@ -67,7 +69,12 @@ alerts.on('alerts-list', (data, channelID) => {
   const sender = client.channels.get(channelID);
   if (sender) {
     sender.send('__Liste des alertes :__');
-    data.forEach(alert => sender.send(`- ${alert.name} sera alerté.`));
+    data.forEach((alert) => {
+      if (alert.mentionName) {
+        return sender.send(`- ${alert.name} (<@${alert.mentionName}>) sera alerté`);
+      }
+      return sender.send(`- ${alert.name} sera alerté.`);
+    });
   }
 });
 

@@ -29,10 +29,11 @@ module.exports = class SnowAlertsHandler extends EventEmitter {
   }
 
   add(newAlert) {
-    const alertObj = {
+    let alertObj = {
       name: newAlert.name,
       channelID: newAlert.channelID,
-      request: newAlert.request
+      request: newAlert.request,
+      mentionName: newAlert.mentionName || null,
       // id: `${newAlert.channelID}-${newAlert.name}`
     };
     const foundAlert = this.alerts.find(alert => alert.name == alertObj.name);
@@ -48,7 +49,7 @@ module.exports = class SnowAlertsHandler extends EventEmitter {
   }
 
   build(alertObj) {
-    const alert = new SnowAlert(alertObj.request, alertObj.channelID, alertObj.name);
+    const alert = new SnowAlert(alertObj.request, alertObj.channelID, alertObj.name, alertObj.mentionName);
     this.alerts.push(alert);
     alert.startPoller();
     alert.on('status-change', (data, channelID) => {
