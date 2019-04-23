@@ -137,7 +137,7 @@ function alert(args, msg) {
   if (args[0] && args[0] == 'link') {
     if (args[1]) {
       const mentionName = msg.author.id;
-      msg.channel.send(`Associate mention ${mentionName} to ${args[1]}`);
+      msg.channel.send(`Associate mention <@${mentionName}> to ${args[1]}`);
       alerts.linkMention(args[1].toUpperCase(), mentionName);
     }
   }
