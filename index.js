@@ -2,6 +2,7 @@ require('dotenv').load();
 
 const Discord = require('discord.js');
 const axios = require('axios');
+const https = require('https');
 
 const endpoints = require('./endpoint.json');
 const keep_alive = require('./keep_alive.js');
@@ -55,10 +56,12 @@ client.on('message', utils.debounce((msg) => {
 alerts.on('alerts-status', (data, channelID) => {
   const sender = client.channels.get(channelID);
   if (sender) {
-    sender.send(
-      `**ALERTE** !
-      Nom : ${data.name} - Feu : ${data.status}`
-    );
+    const template = data.mentionName ?
+    `**ALERTE** !
+      Nom: ${data.name} <@${data.mentionName}> - Feu: ${data.status}` :
+    `**ALERTE** !
+      Nom: ${data.name} - Feu: ${data.status}`;
+    return sender.send(template);
   }
 });
 
@@ -66,7 +69,12 @@ alerts.on('alerts-list', (data, channelID) => {
   const sender = client.channels.get(channelID);
   if (sender) {
     sender.send('__Liste des alertes :__');
-    data.forEach(alert => sender.send(`- ${alert.name} sera alerté.`));
+    data.forEach((alert) => {
+      if (alert.mentionName) {
+        return sender.send(`- ${alert.name} (<@${alert.mentionName}>) sera alerté`);
+      }
+      return sender.send(`- ${alert.name} sera alerté.`);
+    });
   }
 });
 
@@ -125,6 +133,14 @@ function alert(args, msg) {
     msg.channel.send('Turning off automatic alert');
     return alerts.removeAll();
   }
+  // link user alert to discord name
+  if (args[0] && args[0] == 'link') {
+    if (args[1]) {
+      const mentionName = msg.author.id;
+      msg.channel.send(`Associate mention <@${mentionName}> to ${args[1]}`);
+      alerts.linkMention(args[1].toUpperCase(), mentionName);
+    }
+  }
 }
 
 /* Handle snow name command */
@@ -144,10 +160,22 @@ function snowAll(datas, msg) {
 
 // return a specific light status for a given request and associate a name to it.
 function getSnowLightRequest(req, msg, name) {
-  axios.get(req)
+  const agent = new https.Agent({  
+    rejectUnauthorized: false
+  });
+  axios.get(req, { httpsAgent: agent })
     .then(response => parseResponse(response, name.toUpperCase(), msg))
-    .catch(error => {
-      console.log(error);
+    .catch((error) => {
+      if (error.response) {
+        console.log(error.response.data);
+        console.log(error.response.status);
+        console.log(error.response.headers);
+      } else if (error.request) {
+        console.log(error.request);
+      } else {
+        console.log('Error', error.message);
+      }
+      console.log(error.config);
     });
 }
 

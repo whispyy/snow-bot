@@ -29,10 +29,11 @@ module.exports = class SnowAlertsHandler extends EventEmitter {
   }
 
   add(newAlert) {
-    const alertObj = {
+    let alertObj = {
       name: newAlert.name,
       channelID: newAlert.channelID,
-      request: newAlert.request
+      request: newAlert.request,
+      mentionName: newAlert.mentionName || null,
       // id: `${newAlert.channelID}-${newAlert.name}`
     };
     const foundAlert = this.alerts.find(alert => alert.name == alertObj.name);
@@ -48,7 +49,7 @@ module.exports = class SnowAlertsHandler extends EventEmitter {
   }
 
   build(alertObj) {
-    const alert = new SnowAlert(alertObj.request, alertObj.channelID, alertObj.name);
+    const alert = new SnowAlert(alertObj.request, alertObj.channelID, alertObj.name, alertObj.mentionName);
     this.alerts.push(alert);
     alert.startPoller();
     alert.on('status-change', (data, channelID) => {
@@ -56,11 +57,28 @@ module.exports = class SnowAlertsHandler extends EventEmitter {
     });
   }
 
+  linkMention(name, mentionName) {
+    const linkedAlert = this.alerts.find(alert => name == alert.name);
+    if (linkedAlert) {
+      linkedAlert.setMention(mentionName);
+      this.alerts = this.alerts.filter(alert => alert.name !== name);
+      this.alerts.push(linkedAlert);
+
+      // update storage
+      if (this.storage) {
+        storage.removeItem('alerts')
+          .then(() => this.save())
+          .catch(err => console.log('Error remove item', err));;
+      }
+    }
+  }
+
   remove(name) {
     const alert = this.alerts.find(alert => alert.name == name);
     if (alert) {
       alert.stopPoller();
       this.alerts = this.alerts.filter(alert => alert.name != name);
+
       // update storage
       if (this.storage) {
         storage.removeItem('alerts')

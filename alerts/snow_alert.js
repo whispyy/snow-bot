@@ -2,14 +2,17 @@
 
 const EventEmitter = require('events');
 const axios = require('axios');
+const https = require('https');
 
 module.exports = class SnowAlert extends EventEmitter {
-  constructor(request, channelID, name) {
+  constructor(request, channelID, name, mentionName) {
     super();
     this.request = request;
     this.channelID = channelID;
     this.name = name;
     // this.id = id;
+    this.mentionName = mentionName || null;
+
     this.previousValue = null;
   }
 
@@ -20,6 +23,10 @@ module.exports = class SnowAlert extends EventEmitter {
   setRequest(request, name = 'user') {
     this.request = request;
     this.name = name;
+  }
+
+  setMention(mentionName) {
+    this.mentionName = mentionName;
   }
 
   startPoller() {
@@ -48,10 +55,13 @@ module.exports = class SnowAlert extends EventEmitter {
   }
 
   getLightStatus() {
-    axios.get(this.request)
+    const agent = new https.Agent({  
+      rejectUnauthorized: false
+    });
+    axios.get(this.request, { httpsAgent: agent })
     .then((response) => {
       const status = response.data.features[0].attributes.STATUT;
-      this.evaluate({ name: this.name, status });
+      this.evaluate({ name: this.name, mentionName: this.mentionName, status });
     })
     .catch(error => console.log(error));
   }
